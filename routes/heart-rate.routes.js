@@ -10,7 +10,7 @@ heartApiRuoter.post('/heart-rate', async (req, res) => {
         const hearData = HEART_RATE.data;
         hearData.sort(function(s,e) { return new Date(s.on_date) - new Date(e.on_date)});
         let groupedMeasurements = heartRateController.groupMeasurementsByIntervalWithMinMax(hearData)
-        let patientData  = {
+        let patientData = {
             patient_id: payload.patient_id,
             orgid: payload.orgId,
             createdat: new Date(),
@@ -20,7 +20,9 @@ heartApiRuoter.post('/heart-rate', async (req, res) => {
         // Saving data to database
        let patientResult = await Patient.create(patientData)
        console.log('Database ID:',patientResult.id)
-        res.status(200).json({ message: 'Heart rate data saved successfully', data: groupedMeasurements });
+       let response = payload?.clinical_data;
+       response.PROCESSED_HEART_RATE = groupedMeasurements
+       res.status(200).json({ message: 'Heart rate data saved successfully', clinical_data: response });
     } catch (err) {
         console.log(err)
         res.status(500).json({ error: 'Internal Server Error' });
